@@ -1,0 +1,61 @@
+body {
+  margin: 72px 64px;
+  background-color: #eef0f6;
+}
+
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 64px;
+  background-color: hsla(228, 75%, 36%, 0.15);
+  color: #031F55;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: hsla(228, 75%, 36%, 0.25);
+}
+
+.client-card {
+  margin-bottom: 32px; 
+  border-radius: 8px; 
+  overflow: hidden;
+  background-color: white;
+  cursor: pointer;
+}
+
+.card-header {
+  background-color: hsla(228, 75%, 36%, 0.12);
+  color: #031F55;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.card-body {
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.order {
+  margin-bottom: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  cursor: pointer;
+}
+
+.order-header {
+  background-color: hsla(228, 75%, 36%, 0.12);
+  color: #031F55;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.order-body {
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
