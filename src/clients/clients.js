@@ -18,7 +18,7 @@ const getClients = async () => {
 }
 
 const formatClientDataToJson = (data) => {
-  const clientsArray = data.split("\n").slice(1);
+  const clientsArray = data.split("\n").slice(1, -1);
   const json = clientsArray.map(client => {
     const [name, phone, address] = client.split(',');
     return { name, phone, address };
@@ -50,6 +50,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (backBtn) {
     backBtn.addEventListener('click', function() {
       window.location.href = '../index.html';
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const addClientBtn = document.getElementById('add-client-btn');
+  if (addClientBtn) {
+    addClientBtn.addEventListener('click', function() {
+      window.location.href = './add-client.html';
     });
   }
 });

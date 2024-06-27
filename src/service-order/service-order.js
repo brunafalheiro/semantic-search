@@ -40,6 +40,7 @@ const formatServiceOrder = (data) => {
     const [ordemServico, cliente, produtos, valor, desconto, condicoesPagamento] = line.split(regex);
     // Split produtos by comma only if produtos is defined
     const produtosArray = produtos ? produtos.replace(/^"|"$/g, '').split(", ") : []; // Splitting by comma and space to get an array of produtos
+    console.log({ ordemServico, cliente, produtos: produtosArray, valor, desconto, condicoesPagamento });
     return { ordemServico, cliente, produtos: produtosArray, valor, desconto, condicoesPagamento };
   });
 
