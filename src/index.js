@@ -84,11 +84,17 @@ getCatalog = async () => {
         <http://dbpedia.org/resource/Category:Baklava>,
         <http://dbpedia.org/resource/Category:Cheesecakes>,
         <http://dbpedia.org/resource/Category:Muffins>,
-        <http://dbpedia.org/resource/Category:Doughnuts>
+        <http://dbpedia.org/resource/Category:Doughnuts>,
+        <http://dbpedia.org/resource/Category:Tarts>,
+        <http://dbpedia.org/resource/Category:Brownies>,
+        <http://dbpedia.org/resource/Category:Trifles>,
+        <http://dbpedia.org/resource/Category:Flan>,
+        <http://dbpedia.org/resource/Category:Cupcakes>
       )) .
-      FILTER (lang(?label) = "en")
+      FILTER (lang(?label) = "pt")
     }
-    LIMIT 30
+    LIMIT 100
+
   `;
   const data = await fetchDBpediaData(query);
   const allProducts = data.results.bindings;

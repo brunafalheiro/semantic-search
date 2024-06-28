@@ -53,7 +53,7 @@ showCatalog = async (filteredProducts = null) => {
   
     const link = document.createElement('a');
     link.href = obj.product.value;
-    link.textContent = 'View Product';
+    link.textContent = 'Ver produto';
     link.target = '_blank';
   
     container.appendChild(img);
