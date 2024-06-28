@@ -121,7 +121,7 @@ const displayProductData = async (order) => {
       SELECT ?name ?image WHERE { 
       <${productUri}> dbo:thumbnail ?image . 
       <${productUri}> rdfs:label ?name .
-      FILTER (lang(?name) = "en")
+      FILTER (lang(?name) = "pt" || lang(?name) = "en")
     } LIMIT 1`
     
     try {
