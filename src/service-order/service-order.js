@@ -231,8 +231,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const clientURI = await getClientURIByName(clientName);
     if (!clientURI) {
-      alert('Cliente não encontrado.');
       displayServiceOrder();
+      alert('Cliente não encontrado.');
     } else {
       const serviceOrder = await getServiceOrderByClient(clientURI);
       displayServiceOrder(serviceOrder);
