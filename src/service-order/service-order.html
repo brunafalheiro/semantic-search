@@ -8,12 +8,20 @@
   </head>
   <body>
     <div style="display: flex; align-items: center;">
-      <div style="display: flex; align-items: center;">
+      <div style="display: flex; align-items: center; ">
         <button id="back-btn" style="margin-right: 16px;">Voltar</button>
-        <button id="add-service-order-btn" style="margin-right: 16px;">Criar pedido</button>
-        <h1>Pedidos</h1>
       </div>
     </div>
-    <div id="serviceOrderList"></div>
+    <div style="display: flex; flex-direction: column; margin-top: 64px; align-items: center; height: 100%;">
+      <div style="width: 720px; display: flex; align-items: center; justify-content: space-between;">
+        <h1>Pedidos</h1>
+        <div>
+          <input type="text" id="searchInput" placeholder="Buscar por cliente" style="margin-right: 8px;">
+          <button id="searchBtn">Buscar</button>
+        </div>
+      </div>
+      <div id="serviceOrderList"></div>
+      <button id="add-service-order-btn" style="position: fixed; bottom: 36; right: 36; width: 56; height: 56; padding: 0; font-size: 24px;">+</button>
+    </div>
   </body>
 </html>

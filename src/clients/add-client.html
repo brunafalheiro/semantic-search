@@ -8,26 +8,28 @@
     <title>Adicionar Cliente</title>
   </head>
   <body>
-     <div>
-        <div style="display: flex; align-items: center;">
-          <button id="back-btn" style="margin-right: 16px;">Voltar</button>
-          <h1>Adicionar cliente</h1>
-        </div>
-        <form id="formClient">
-          <div>
-            <label for="name">Nome</label>
-            <input type="text" id="name" name="name" class="form-input" placeholder="Nome" required>
-          </div>
-          <div>
-            <label for="phone">Telefone</label>
-            <input type="tel" id="phone" name="phone" class="form-input" placeholder="Telefone" required>
-          </div>
-          <div>
-            <label for="address">Endereço</label>
-            <input type="text" id="address" name="address" class="form-input" placeholder="Endereço" required>
-          </div>
-          <button type="submit" id="add-client-btn">Adicionar Cliente</button>
-        </form>
-      <div>
+    <button id="back-btn">Voltar</button>
+    <div style="display: flex; flex-direction: column; margin-top: 64px; align-items: center; height: 100%;">
+      <div class="container">
+        <h1 style="margin-bottom: 36px;">Adicionar cliente</h1>
+         <form id="formClient">
+           <div>
+             <label for="name">Nome</label>
+             <input type="text" id="name" name="name" class="form-input" placeholder="Nome" style="width: 250px;" required>
+           </div>
+           <div>
+             <label for="phone">Telefone</label>
+             <input type="tel" id="phone" name="phone" class="form-input" placeholder="Telefone" style="width: 250px;" required>
+           </div>
+           <div>
+             <label for="address">Endereço</label>
+             <input type="text" id="address" name="address" class="form-input" placeholder="Endereço" style="width: 250px;" required>
+           </div>
+           <div style="margin-top: 36px; display: flex; justify-content: end;">
+            <button type="submit" id="add-client-btn">Adicionar</button>
+           </div>
+         </form>
+       <div>
+    </div>
   </body>
 </html>

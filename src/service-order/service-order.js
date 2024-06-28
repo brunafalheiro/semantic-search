@@ -19,10 +19,86 @@ const fetchDBpediaData = async (query) => {
 };
 
 // Função para obter ordens de serviço
-const getServiceOrder = async () => {
-  const queryURL = 'http://localhost:7200/repositories/semantic-search?query=PREFIX%20%3A%20%3Chttp%3A%2F%2Fexample.org%2F%3E%20PREFIX%20ex%3A%20%3Chttp%3A%2F%2Fexample.org%2Fex%23%3E%20%20SELECT%20%3FordemServico%20%3Fcliente%20(GROUP_CONCAT(DISTINCT%20%3Fproduto%3B%20SEPARATOR%3D%22%2C%20%22)%20AS%20%3Fprodutos)%20%3Fvalor%20%3Fdesconto%20%3FcondicoesPagamento%20WHERE%20%7B%20%20%20%3FordemServico%20a%20%3AOrdemServico%20%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3AtemCliente%20%3Fcliente%20%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Aprodutos%20%3Fproduto%20%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Avalor%20%3Fvalor%20%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3Adesconto%20%3Fdesconto%20%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3AcondicoesPagamento%20%3FcondicoesPagamento%20.%20%7D%20GROUP%20BY%20%3FordemServico%20%3Fcliente%20%3Fvalor%20%3Fdesconto%20%3FcondicoesPagamento';
+const getServiceOrders = async () => {
+  const query = `
+    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
+    PREFIX ex: <http://example.com/>
+
+    SELECT ?ordemServico ?cliente ?produto ?valor ?condicoesPagamento
+    WHERE {
+      ?ordemServico rdf:type ex:OrdemServico ;
+                    ex:cliente ?cliente ;
+                    ex:produto ?produto ;
+                    ex:valor ?valor ;
+                    ex:condicoesPagamento ?condicoesPagamento .
+    }`;
+  const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
   const response = await fetchRequest(queryURL);
-  return response.text();
+  const responseText = await response.text();
+  return responseText;
+};
+
+
+const getServiceOrderByClient = async (clientURI) => {
+  const query = `
+    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
+    PREFIX ex: <http://example.com/>
+
+    SELECT ?ordemServico ?cliente ?produto ?valor ?condicoesPagamento
+    WHERE {
+      ?ordemServico rdf:type ex:OrdemServico ;
+                    ex:cliente ?cliente ;
+                    ex:produto ?produto ;
+                    ex:valor ?valor ;
+                    ex:condicoesPagamento ?condicoesPagamento .
+      
+      FILTER (?cliente = <${clientURI}>)
+    }`;
+  const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
+  const response = await fetchRequest(queryURL);
+  const responseText = await response.text();
+  console.log(responseText)
+  return responseText;
+}
+
+const getClientNameByURI = async (clientURI) => {
+  const query = `
+    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns#>
+    PREFIX ex: <http://example.com/>
+
+    SELECT ?nome
+    WHERE {
+      BIND (<${clientURI}> AS ?cliente)
+      ?cliente rdf:type ex:Cliente ;
+              ex:nome ?nome .
+    }`;
+
+    const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
+    const response = await fetchRequest(queryURL);
+    const responseText = await response.text();
+    const lines = responseText.split('\n');
+    lines.shift();
+    const modifiedText = lines.join('\n');
+    return modifiedText;
+};
+
+const getClientURIByName = async (clientName) => {
+  const query = `
+  PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
+  PREFIX ex: <http://example.com/>
+
+  SELECT ?cliente_uri
+  WHERE {
+    ?cliente_uri ex:nome ?nome .
+    FILTER(contains(lcase(str(?nome)), "${clientName}"))
+  }`;
+
+  const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
+  const response = await fetchRequest(queryURL);
+  const responseText = await response.text();
+  const text = responseText.split('\n').slice(1, -1);
+  if (!text.length) return null;
+  return text[0].trim();
 };
 
 // Função para formatar a ordem de serviço
@@ -31,73 +107,102 @@ const formatServiceOrder = (data) => {
   const regex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
   
   return lines.map(line => {
-    const [ordemServico, cliente, produtos, valor, desconto, condicoesPagamento] = line.split(regex);
+    const [ordemServico, cliente, produtos, valor, condicoesPagamento] = line.split(regex);
     const produtosArray = produtos.replace(/^"|"$/g, '').split(", ");
-    return { ordemServico, cliente, produtos: produtosArray, valor, desconto, condicoesPagamento };
+    return { ordemServico, cliente, produtos: produtosArray, valor, condicoesPagamento };
   });
 };
 
 // Função para exibir imagens dos produtos
-const displayProductImages = async (order) => {
+const displayProductData = async (order) => {
   const serviceOrderList = document.getElementById('serviceOrderList');
-  for (const produtoUri of order.produtos) {
-    const query = `SELECT ?image WHERE { <${produtoUri}> dbo:thumbnail ?image . } LIMIT 1`;
+  for (const productUri of order.produtos) {
+    // Modificada a query para buscar também o nome do produto
+    const query = `
+      SELECT ?name ?image WHERE { 
+      <${productUri}> dbo:thumbnail ?image . 
+      <${productUri}> rdfs:label ?name .
+      FILTER (lang(?name) = "en")
+    } LIMIT 1`
+    
     try {
       const data = await fetchDBpediaData(query);
       if (data.results.bindings.length > 0) {
         const imageUrl = data.results.bindings[0].image.value;
+        const productName = data.results.bindings[0].name.value; 
+
         const imgElement = document.createElement('img');
         imgElement.src = imageUrl;
-        imgElement.style.width = '200px';
+        imgElement.style.height = '200px';
 
         const orderElement = serviceOrderList.querySelector(`.order[data-ordem-servico="${order.ordemServico}"]`);
-        orderElement?.appendChild(imgElement);
+        if (orderElement) {
+            const nameElement = orderElement.querySelector('.product-name');
+            if (nameElement) {
+                nameElement.textContent = `Produto: ${productName}`;
+            }
+            orderElement.appendChild(imgElement);
+        }
       }
     } catch (error) {
-      console.error('Erro ao buscar imagem do produto:', produtoUri, error);
+      console.error('Erro ao buscar dados do produto:', productUri, error);
     }
   }
 };
 
+
 // Função para exibir ordens de serviço com imagens
-const displayServiceOrdersWithImages = async () => {
-  const data = await getServiceOrder();
+const displayServiceOrder = async (loadedContent) => {
+  var data = loadedContent ? loadedContent : await getServiceOrders();
   const serviceOrders = formatServiceOrder(data);
   const serviceOrderList = document.getElementById('serviceOrderList');
-  serviceOrderList.innerHTML = ''; 
+  serviceOrderList.innerHTML = '';
 
-  serviceOrders.forEach(order => {
+  for (const order of serviceOrders) {
     const orderElement = document.createElement('div');
     orderElement.classList.add('order');
     orderElement.setAttribute('data-ordem-servico', order.ordemServico);
 
-    const orderHeader = document.createElement('div');
-    orderHeader.classList.add('order-header');
-    orderHeader.textContent = `Pedido: ${order.ordemServico}`;
-
     const orderBody = document.createElement('div');
     orderBody.classList.add('order-body');
+    const clientName = await getClientNameByURI(order.cliente);
     const orderDetails = `
-      <p>Cliente: ${order.cliente}</p>
-      <p>Produtos: ${order.produtos.join(', ')}</p>
+      <p>Cliente: ${clientName}</p>
+      <p class='product-name'>Produtos: ${order.produtos.join(', ')}</p>
       <p>Valor: ${order.valor}</p>
-      <p>Desconto: ${order.desconto}</p>
       <p>Condições de Pagamento: ${order.condicoesPagamento}</p>
     `;
     orderBody.innerHTML = orderDetails;
-    orderElement.appendChild(orderHeader);
     orderElement.appendChild(orderBody);
     serviceOrderList.appendChild(orderElement);
 
-    displayProductImages(order);
-  });
+    displayProductData(order);
+  }
 };
 
+
 document.addEventListener('DOMContentLoaded', () => {
-  displayServiceOrdersWithImages();
+  displayServiceOrder();
   const backBtn = document.getElementById('back-btn');
   backBtn?.addEventListener('click', () => window.location.href = '../index.html');
 
   const addServiceOrderBtn = document.getElementById('add-service-order-btn');
   addServiceOrderBtn?.addEventListener('click', () => window.location.href = './create-service-order.html');
+
+  document.getElementById('searchBtn').addEventListener('click', async () => {
+    const clientName = document.getElementById('searchInput').value;
+    if (!clientName) {
+      displayServiceOrder();
+      return;
+    }
+
+    const clientURI = await getClientURIByName(clientName);
+    if (!clientURI) {
+      alert('Cliente não encontrado.');
+      return;
+    }
+    console.log('clientURI', clientURI);
+    const vasco = await getServiceOrderByClient(clientURI);
+    displayServiceOrder(vasco);
+  });
 });

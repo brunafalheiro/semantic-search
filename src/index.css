@@ -3,9 +3,21 @@ body {
   background-color: #eef0f6;
 }
 
+h1, p, span, label, div {
+  font-family: 'Trebuchet MS';
+}
+
+p {
+  font-size: 18px;
+}
+
+h1 {
+  font-weight: 500;
+}
+
 .container {
   width: 280px;
-  padding: 64px 36px;
+  padding: 36px 36px 48px 36px;
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 0 16px 0 rgba(16, 0, 78, 0.1);
@@ -45,15 +57,19 @@ button:hover {
 
 .card-body {
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: white;
 }
 
 .order {
+  width: 720px;
   margin-bottom: 32px;
   border-radius: 8px;
   overflow: hidden;
   background-color: white;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+
 }
 
 .order-header {
@@ -63,9 +79,14 @@ button:hover {
   font-size: 20px;
 }
 
+.order > img {
+    width: 320px;
+}
+
 .order-body {
-  padding: 10px;
-  background-color: #f9f9f9;
+  padding: 12px 24px;
+  background-color: white;
+  font-size: 18px;
 }
 
 .form-input {
@@ -147,4 +168,8 @@ a {
 }
 a:hover {
   text-decoration: underline;
+}
+
+#productImage > img {
+  height: 283px;
 }

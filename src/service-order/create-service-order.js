@@ -9,6 +9,26 @@ const fetchRequest = async (url) => {
   }
 };
 
+const postRequest = async (url, data) => {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      return response;
+    } else {
+      return Promise.reject(response);
+    }
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
 const getClientByPhone = async (phone) => {
   try {
     const query = `
@@ -30,10 +50,10 @@ const getClientByPhone = async (phone) => {
       console.log('No client found');
       return null;
     }
-    
-    return responseText;
+    const clientUrl = lines.slice(1).map(line => line.trim())[0]; 
+    return clientUrl;
   } catch (error) {
-    console.log(error);
+    return Promise.reject(error);
   }
 }
 
@@ -47,22 +67,29 @@ function generateRandomId(length) {
   return result;
 }
 
-const insertServiceOrder = (data) => {
-  const query = `
-    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns#>
+const insertServiceOrder = async (data) => {
+  try {
+    const query = `
+    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
     PREFIX dbpedia: <http://dbpedia.com/resource/>
     PREFIX ex: <http://example.com/>
 
     INSERT DATA {
       ex:${generateRandomId(12)} rdf:type ex:OrdemServico ;
-      ex:cliente ex:${data.client} ;
-      ex:produto "${data.products}" ;  
-      ex:valor ${data.price} ;                   
+      ex:cliente <${data.client}> ;
+      ex:produto <${data.product}> ;
+      ex:valor "${data.price}"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
       ex:condicoesPagamento "${data.paymentOptions}" .  
     }`;
 
-  console.log(query);
-
+    
+    console.log(query);
+    const url = `http://localhost:7200/repositories/semantic-search/statements?update=${encodeURIComponent(query)}`
+    const response = await postRequest(url);
+    return response;
+  } catch (error) {
+    return Promise.reject(error);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -102,23 +129,25 @@ document.addEventListener('DOMContentLoaded', function() {
   const addServiceOrderBtn = document.getElementById('add-service-order-btn');
   if (addServiceOrderBtn) {
     addServiceOrderBtn.addEventListener('click', async function() {
-      const name = document.getElementById('name').value;
       const phone = document.getElementById('phone').value;
       const product = document.getElementById('product').value;
       const price = document.getElementById('price').value;
       const paymentOptions = document.getElementById('payment').value;
-
-      if (!name || !phone || !product || !price || !paymentOptions) {
+      if (!phone || !product || !price || !paymentOptions) {
         alert('Por favor, preencha todos os campos.');
         return;
       }
 
-      const data = {name, phone, product, price, paymentOptions};
       const client = await getClientByPhone(phone);
       if (!client) {
         alert('O cliente precisa estar cadastrado para associá-lo a um pedido.');
         return;
       }
+
+      const data = {client, product, price, paymentOptions};
+      const response = await insertServiceOrder(data);
+      if (response) alert('Pedido criado com sucesso!');
+      window.location.href = './service-order.html';
     });
   }
 });

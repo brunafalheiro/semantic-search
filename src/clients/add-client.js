@@ -1,4 +1,4 @@
-const post = async (url, data) => {
+const postRequest = async (url, data) => {
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -18,10 +18,6 @@ const post = async (url, data) => {
   }
 }
 
-const insertClient = async (url) => {
-  return await post(url);
-}
-
 async function addClient() {
   const name = document.getElementById('name').value;
   const phone = document.getElementById('phone').value;
@@ -36,9 +32,10 @@ async function addClient() {
       ex:endereco "${address}" .
     }`;
   const url = `http://localhost:7200/repositories/semantic-search/statements?update=${encodeURIComponent(query)}`;
-  await insertClient(url);
+  await postRequest(url);
   alert('Cliente adicionado com sucesso!');
   document.getElementById('formClient').reset();
+  window.location.href = './clients.html';
 }
 
 document.addEventListener('DOMContentLoaded', function() {

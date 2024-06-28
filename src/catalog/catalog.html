@@ -8,13 +8,13 @@
 </head>
 
 <body>
-  <div style="display: flex; align-items: center;">
-    <button id="back-btn" style="margin-right: 16px;">Voltar</button>
+  <button id="back-btn" style="margin-right: 16px;">Voltar</button>
+  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; margin-top: 64px; align-items: center;">
     <h1>Catálogo</h1>
-  </div>
-  <div style="margin-bottom: 24px;">
-    <input type="text" id="searchInput" placeholder="Procurar" style="margin: 0px 16px;">
-    <button onclick="searchProducts()">Search</button>
+    <div style="display: flex; height: 46px; align-items: end;">
+      <input type="text" id="searchInput" placeholder="Procurar" style="margin-right: 16px;">
+      <button onclick="searchProducts()">Search</button>
+    </div>
   </div>
   <div id="catalog"></div>
 </body>

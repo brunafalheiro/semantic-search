@@ -8,10 +8,15 @@
   </head>
   <body>
     <div style="display: flex; align-items: center;">
-      <button id="back-btn" style="margin-right: 16px;">Voltar</button>
-      <button id="add-client-btn" style="margin-right: 16px;">Adicionar cliente</button>
-      <h1>Clientes</h1>
+      <button id="back-btn">Voltar</button>
     </div>
-    <div id="clientsList"></div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; height: 100%; margin-top: 64px;">
+      <div style="width: 720px; display: flex; align-items: center; justify-content: space-between;">
+        <h1>Clientes</h1>
+        <button id="add-client-btn">Adicionar cliente</button>
+      </div>
+      <div id="clientsList" style="width: 720px;"></div>
+    </div>
   </body>
 </html>

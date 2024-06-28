@@ -8,18 +8,12 @@
     <title>Criar pedido</title>
   </head>
   <body>
-    <div style="display: flex; align-items: center;">
       <button id="back-btn" style="margin-right: 16px;">Voltar</button>
-      <h1>Criar pedido</h1>
-    </div>
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 48px; height: 100%;">
       <div style="width: 580px;" class="container">
+        <h1 style="margin-bottom: 64px;">Criar pedido</h1>
         <div style="display: flex;">
           <form id="formServiceOrder" style="margin-right: 24px;">
-            <div>
-              <label for="name">Nome do cliente</label>
-              <input type="text" id="name" name="name" class="form-input" placeholder="Nome" required>
-            </div>
             <div>
               <label for="phone">Telefone</label>
               <input type="tel" id="phone" name="phone" class="form-input" placeholder="Telefone" required>
@@ -41,8 +35,8 @@
           </form>
           <div id="productImage" style="margin-top: 18px;"></div>
         </div>
-        <div style="display: flex; width: 100%; justify-content: end; align-items: baseline; margin-top: 24px;">
-          <button type="click" id="add-service-order-btn">Gerar</button>
+        <div style="display: flex; width: 100%; justify-content: center; align-items: baseline; margin-top: 48px;">
+          <button type="click" id="add-service-order-btn" style="width: 200px;">Gerar</button>
         </div>
       <div>
     </div>
