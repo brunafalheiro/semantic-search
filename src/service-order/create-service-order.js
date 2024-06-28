@@ -47,7 +47,7 @@ const getClientByPhone = async (phone) => {
     const responseText = await response.text();
     const lines = responseText.trim().split('\n');
     if (lines.length <= 1) {
-      console.log('No client found');
+      console.error('No client found');
       return null;
     }
     const clientUrl = lines.slice(1).map(line => line.trim())[0]; 
@@ -83,7 +83,6 @@ const insertServiceOrder = async (data) => {
     }`;
 
     
-    console.log(query);
     const url = `http://localhost:7200/repositories/semantic-search/statements?update=${encodeURIComponent(query)}`
     const response = await postRequest(url);
     return response;

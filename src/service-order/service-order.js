@@ -57,7 +57,6 @@ const getServiceOrderByClient = async (clientURI) => {
   const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
   const response = await fetchRequest(queryURL);
   const responseText = await response.text();
-  console.log(responseText)
   return responseText;
 }
 
@@ -90,7 +89,7 @@ const getClientURIByName = async (clientName) => {
   SELECT ?cliente_uri
   WHERE {
     ?cliente_uri ex:nome ?nome .
-    FILTER(contains(lcase(str(?nome)), "${clientName}"))
+    FILTER(contains(lcase(str(?nome)), lcase("${clientName}")))
   }`;
 
   const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
@@ -103,7 +102,7 @@ const getClientURIByName = async (clientName) => {
 
 // Função para formatar a ordem de serviço
 const formatServiceOrder = (data) => {
-  const lines = data.split("\n").slice(1, -1);
+  const lines = data.split("\n").slice(1, -1).reverse();
   const regex = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
   
   return lines.map(line => {
@@ -181,28 +180,44 @@ const displayServiceOrder = async (loadedContent) => {
 };
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  displayServiceOrder();
+document.addEventListener('DOMContentLoaded', async () => {
+  const url = window.location.href;
+  const urlParams = new URLSearchParams(new URL(url).search);
+  const action = urlParams.get('action');
+  const clientNameFromURL = urlParams.get('clientName');
+
+  async function fetchAndDisplayServiceOrder(clientName) {
+    if (!clientName) {
+      displayServiceOrder();
+      return;
+    }
+    const clientURI = await getClientURIByName(clientName);
+    if (!clientURI) {
+      alert('Cliente não encontrado.');
+      displayServiceOrder();
+    } else {
+      const serviceOrder = await getServiceOrderByClient(clientURI);
+      displayServiceOrder(serviceOrder);
+    }
+  }
+
+  // If there are action and clientName in the URL, use them to fetch and display service order.
+  // Otherwise, display service order without parameters.
+  const cameFromClientsPage = action && clientNameFromURL;
+  if (cameFromClientsPage) {
+    await fetchAndDisplayServiceOrder(clientNameFromURL);
+  } else {
+    displayServiceOrder();
+  }
+
   const backBtn = document.getElementById('back-btn');
-  backBtn?.addEventListener('click', () => window.location.href = '../index.html');
+  backBtn?.addEventListener('click', () => window.location.href = cameFromClientsPage ? '../clients/clients.html' : '../index.html');
 
   const addServiceOrderBtn = document.getElementById('add-service-order-btn');
   addServiceOrderBtn?.addEventListener('click', () => window.location.href = './create-service-order.html');
 
   document.getElementById('searchBtn').addEventListener('click', async () => {
-    const clientName = document.getElementById('searchInput').value;
-    if (!clientName) {
-      displayServiceOrder();
-      return;
-    }
-
-    const clientURI = await getClientURIByName(clientName);
-    if (!clientURI) {
-      alert('Cliente não encontrado.');
-      return;
-    }
-    console.log('clientURI', clientURI);
-    const vasco = await getServiceOrderByClient(clientURI);
-    displayServiceOrder(vasco);
+    const clientNameInput = document.getElementById('searchInput').value;
+    await fetchAndDisplayServiceOrder(clientNameInput);
   });
 });

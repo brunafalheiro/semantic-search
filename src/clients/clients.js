@@ -53,6 +53,10 @@ const displayClients = async () => {
         <p>Endereço: ${client.address}</p>
       </div>`;
     clientsContainer.appendChild(clientElement);
+
+    clientElement.addEventListener('click', () => {
+      window.location.href = `../service-order/service-order.html?action=fillForm&clientName=${client.name}`;
+    });
   });
 }
 
