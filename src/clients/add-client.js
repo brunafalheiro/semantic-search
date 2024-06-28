@@ -33,9 +33,9 @@ async function addClient() {
     }`;
   const url = `http://localhost:7200/repositories/semantic-search/statements?update=${encodeURIComponent(query)}`;
   await postRequest(url);
-  alert('Cliente adicionado com sucesso!');
   document.getElementById('formClient').reset();
   window.location.href = './clients.html';
+  alert('Cliente adicionado com sucesso!');
 }
 
 document.addEventListener('DOMContentLoaded', function() {

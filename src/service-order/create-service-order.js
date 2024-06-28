@@ -67,22 +67,39 @@ function generateRandomId(length) {
   return result;
 }
 
+function formatDateToCustomString(date) {
+  const pad = (num) => num.toString().padStart(2, '0');
+
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hour = pad(date.getHours());
+  const minute = pad(date.getMinutes());
+  const second = pad(date.getSeconds());
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+}
+
 const insertServiceOrder = async (data) => {
   try {
+    const date = new Date();
+    const formattedDate = formatDateToCustomString(date);
     const query = `
-    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
-    PREFIX dbpedia: <http://dbpedia.com/resource/>
-    PREFIX ex: <http://example.com/>
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      PREFIX dbpedia: <http://dbpedia.org/resource/>
+      PREFIX ex: <http://example.com/>
+      PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    INSERT DATA {
-      ex:${generateRandomId(12)} rdf:type ex:OrdemServico ;
-      ex:cliente <${data.client}> ;
-      ex:produto <${data.product}> ;
-      ex:valor "${data.price}"^^<http://www.w3.org/2001/XMLSchema#decimal> ;
-      ex:condicoesPagamento "${data.paymentOptions}" .  
+      INSERT DATA { 
+        ex:${generateRandomId(12)} rdf:type ex:OrdemServico ; 
+          ex:cliente <${data.client}> ; 
+          ex:produto <${data.product}> ; 
+          ex:valor "${data.price}"^^xsd:decimal ; 
+          ex:condicoesPagamento "${data.paymentOptions}" ; 
+          ex:dataCriacao "${formattedDate}"^^xsd:dateTime .
     }`;
 
-    
+
     const url = `http://localhost:7200/repositories/semantic-search/statements?update=${encodeURIComponent(query)}`
     const response = await postRequest(url);
     return response;
@@ -132,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const product = document.getElementById('product').value;
       const price = document.getElementById('price').value;
       const paymentOptions = document.getElementById('payment').value;
+
       if (!phone || !product || !price || !paymentOptions) {
         alert('Por favor, preencha todos os campos.');
         return;
@@ -143,10 +161,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      const data = {client, product, price, paymentOptions};
+      const creationDate = new Date().toISOString();
+      const data = {client, product, price, paymentOptions, creationDate};
       const response = await insertServiceOrder(data);
-      if (response) alert('Pedido criado com sucesso!');
       window.location.href = './service-order.html';
+      if (response) alert('Pedido criado com sucesso!');
     });
   }
 });

@@ -18,20 +18,53 @@ const fetchDBpediaData = async (query) => {
   return response.json();
 };
 
-// Função para obter ordens de serviço
+// Get service orders
 const getServiceOrders = async () => {
   const query = `
-    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX ex: <http://example.com/>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    SELECT ?ordemServico ?cliente ?produto ?valor ?condicoesPagamento
-    WHERE {
-      ?ordemServico rdf:type ex:OrdemServico ;
-                    ex:cliente ?cliente ;
-                    ex:produto ?produto ;
-                    ex:valor ?valor ;
-                    ex:condicoesPagamento ?condicoesPagamento .
-    }`;
+    SELECT ?ordemServico (SAMPLE(?cliente) AS ?cliente) (SAMPLE(?produto) AS ?produto) (SAMPLE(?valor) AS ?valor) (SAMPLE(?condicoesPagamento) AS ?condicoesPagamento)
+    WHERE { 
+      ?ordemServico rdf:type ex:OrdemServico ; 
+        ex:cliente ?cliente ; 
+        ex:produto ?produto ; 
+        ex:valor ?valor ; 
+        ex:condicoesPagamento ?condicoesPagamento ; 
+    } 
+    GROUP BY ?ordemServico`;
+
+  const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
+  const response = await fetchRequest(queryURL);
+  const responseText = await response.text();
+  return responseText;
+};
+
+// Get service orders by date
+const getServiceOrdersByDate = async (selectedDate) => {
+  const date = new Date(selectedDate); 
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate() + 1;
+  
+  const query = `
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX ex: <http://example.com/>
+  PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+  
+  SELECT ?ordemServico (SAMPLE(?cliente) AS ?cliente) (SAMPLE(?produto) AS ?produto) (SAMPLE(?valor) AS ?valor) (SAMPLE(?condicoesPagamento) AS ?condicoesPagamento) (SAMPLE(?dataCriacao) AS ?dataCriacao) 
+  WHERE { 
+    ?ordemServico rdf:type ex:OrdemServico ; 
+      ex:cliente ?cliente ; 
+      ex:produto ?produto ; 
+      ex:valor ?valor ; 
+      ex:condicoesPagamento ?condicoesPagamento ; 
+      ex:dataCriacao ?dataCriacao . 
+    FILTER( year(?dataCriacao) = ${year} && month(?dataCriacao) = ${month} && day(?dataCriacao) = ${day} ) 
+  } 
+  GROUP BY ?ordemServico`;
+
   const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
   const response = await fetchRequest(queryURL);
   const responseText = await response.text();
@@ -41,19 +74,21 @@ const getServiceOrders = async () => {
 
 const getServiceOrderByClient = async (clientURI) => {
   const query = `
-    PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX ex: <http://example.com/>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    SELECT ?ordemServico ?cliente ?produto ?valor ?condicoesPagamento
-    WHERE {
-      ?ordemServico rdf:type ex:OrdemServico ;
-                    ex:cliente ?cliente ;
-                    ex:produto ?produto ;
-                    ex:valor ?valor ;
-                    ex:condicoesPagamento ?condicoesPagamento .
-      
-      FILTER (?cliente = <${clientURI}>)
-    }`;
+    SELECT ?ordemServico (SAMPLE(?cliente) AS ?cliente) (SAMPLE(?produto) AS ?produto) (SAMPLE(?valor) AS ?valor) (SAMPLE(?condicoesPagamento) AS ?condicoesPagamento)
+    WHERE { 
+      ?ordemServico rdf:type ex:OrdemServico ; 
+        ex:cliente ?cliente ; 
+        ex:produto ?produto ; 
+        ex:valor ?valor ; 
+        ex:condicoesPagamento ?condicoesPagamento ; 
+      FILTER(?cliente = <${clientURI}>)
+    } 
+    GROUP BY ?ordemServico`;
+
   const queryURL = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
   const response = await fetchRequest(queryURL);
   const responseText = await response.text();
@@ -153,6 +188,7 @@ const displayProductData = async (order) => {
 // Função para exibir ordens de serviço com imagens
 const displayServiceOrder = async (loadedContent) => {
   var data = loadedContent ? loadedContent : await getServiceOrders();
+
   const serviceOrders = formatServiceOrder(data);
   const serviceOrderList = document.getElementById('serviceOrderList');
   serviceOrderList.innerHTML = '';
@@ -181,16 +217,18 @@ const displayServiceOrder = async (loadedContent) => {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const url = window.location.href;
-  const urlParams = new URLSearchParams(new URL(url).search);
-  const action = urlParams.get('action');
-  const clientNameFromURL = urlParams.get('clientName');
+  async function fetchAndDisplayServiceOrder({clientName, selectedDate}) {
+    if (selectedDate) {
+      const serviceOrder = await getServiceOrdersByDate(selectedDate);
+      displayServiceOrder(serviceOrder);
+      return;
+    }
 
-  async function fetchAndDisplayServiceOrder(clientName) {
     if (!clientName) {
       displayServiceOrder();
       return;
     }
+
     const clientURI = await getClientURIByName(clientName);
     if (!clientURI) {
       alert('Cliente não encontrado.');
@@ -201,23 +239,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  const url = window.location.href;
+  const urlParams = new URLSearchParams(new URL(url).search);
+  const clientNameFromURL = urlParams.get('clientName');
+
   // If there are action and clientName in the URL, use them to fetch and display service order.
   // Otherwise, display service order without parameters.
-  const cameFromClientsPage = action && clientNameFromURL;
-  if (cameFromClientsPage) {
-    await fetchAndDisplayServiceOrder(clientNameFromURL);
+  if (clientNameFromURL) {
+    await fetchAndDisplayServiceOrder({clientName: clientNameFromURL});
   } else {
     displayServiceOrder();
   }
 
   const backBtn = document.getElementById('back-btn');
-  backBtn?.addEventListener('click', () => window.location.href = cameFromClientsPage ? '../clients/clients.html' : '../index.html');
+  backBtn?.addEventListener('click', () => window.location.href = clientNameFromURL ? '../clients/clients.html' : '../index.html');
 
   const addServiceOrderBtn = document.getElementById('add-service-order-btn');
   addServiceOrderBtn?.addEventListener('click', () => window.location.href = './create-service-order.html');
 
   document.getElementById('searchBtn').addEventListener('click', async () => {
     const clientNameInput = document.getElementById('searchInput').value;
-    await fetchAndDisplayServiceOrder(clientNameInput);
+    document.getElementById('dateSearchInput').value = '';
+    await fetchAndDisplayServiceOrder({clientName: clientNameInput});
+  });
+  
+  document.getElementById('dateSearchInput').addEventListener('change', async () => {
+    const selectedDate = document.getElementById('dateSearchInput').value;
+    document.getElementById('searchInput').value = '';
+    await fetchAndDisplayServiceOrder({selectedDate: selectedDate});
   });
 });
