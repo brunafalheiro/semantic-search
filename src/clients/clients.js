@@ -13,14 +13,25 @@ const request = async (url) => {
 }
 
 const getClients = async () => {
-  const url = 'http://localhost:7200/repositories/semantic-search?query=PREFIX%20%3A%20%3Chttp%3A%2F%2Fwww.semanticweb.org%2Fbruna%2Fontologies%2F2024%2F5%2Funtitled-ontology-3%2F%3E%20PREFIX%20ex%3A%20%3Chttp%3A%2F%2Fexample.com%2F%3E%20PREFIX%20rdf%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23%3E%20%20SELECT%20%3Fnome%20%3Ftelefone%20%3Fendereco%20WHERE%20%7B%20%20%20%3Fcliente%20rdf%3Atype%20ex%3ACliente%20%3B%20%20%20%20%20%20%20%20%20%20%20ex%3Anome%20%3Fnome%20%3B%20%20%20%20%20%20%20%20%20%20%20%20ex%3Atelefone%20%3Ftelefone%20%3B%20%20%20%20%20%20%20%20%20%20%20%20ex%3Aendereco%20%3Fendereco%20.%20%7D';
+  const query = `
+  PREFIX rdf: <http://www.w3.com/1999/02/22-rdf-syntax-ns#>
+  PREFIX ex: <http://example.com/>
+
+  SELECT ?cliente ?nome ?telefone ?endereco
+  WHERE {
+    ?cliente rdf:type ex:Cliente ;
+            ex:nome ?nome ;
+            ex:telefone ?telefone ;
+            ex:endereco ?endereco .
+  }`;
+  const url = `http://localhost:7200/repositories/semantic-search?query=${encodeURIComponent(query)}`;
   return await request(url);
 }
 
 const formatClientDataToJson = (data) => {
   const clientsArray = data.split("\n").slice(1, -1);
   const json = clientsArray.map(client => {
-    const [name, phone, address] = client.split(',');
+    const [uri, name, phone, address] = client.split(',');
     return { name, phone, address };
   });
 
@@ -52,15 +63,13 @@ document.addEventListener('DOMContentLoaded', function() {
       window.location.href = '../index.html';
     });
   }
-});
 
-document.addEventListener('DOMContentLoaded', function() {
   const addClientBtn = document.getElementById('add-client-btn');
   if (addClientBtn) {
     addClientBtn.addEventListener('click', function() {
       window.location.href = './add-client.html';
     });
   }
-});
 
-displayClients();
+  displayClients();
+});

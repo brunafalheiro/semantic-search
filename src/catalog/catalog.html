@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Catálogo de Produtos</title>
+  <script src="catalog.js"></script>
+  <link rel="stylesheet" href="../index.css">
+</head>
+
+<body>
+  <div style="display: flex; align-items: center;">
+    <button id="back-btn" style="margin-right: 16px;">Voltar</button>
+    <h1>Catálogo</h1>
+  </div>
+  <div style="margin-bottom: 24px;">
+    <input type="text" id="searchInput" placeholder="Procurar" style="margin: 0px 16px;">
+    <button onclick="searchProducts()">Search</button>
+  </div>
+  <div id="catalog"></div>
+</body>
+</html>

@@ -3,6 +3,14 @@ body {
   background-color: #eef0f6;
 }
 
+.container {
+  width: 280px;
+  padding: 64px 36px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 16px 0 rgba(16, 0, 78, 0.1);
+}
+
 button {
   padding: 12px 24px;
   border: none;
@@ -13,6 +21,7 @@ button {
   font-size: 18px;
   font-weight: 500;
   transition: background-color 0.2s;
+  min-height: 48px;
 }
 
 button:hover {
@@ -65,7 +74,7 @@ button:hover {
 }
 
 input {
-  min-width: 200px;
+  width: 220px;
   padding: 12px 16px;
   border-radius: 6px;
   color: #031F55;
@@ -84,4 +93,58 @@ input:hover {
 input::placeholder {
   color: hsla(228, 87%, 15%, 0.25);
   opacity: 1;
+}
+
+select {
+  width: 252px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  color: #031F55;
+  font-size: 18px;
+  background-color: hsla(228, 75%, 36%, 0.12);
+  border: none;
+}
+select:focus {
+  border: none;
+  outline: none;
+}
+select:hover {
+  border: none;
+  background-color: hsla(228, 75%, 36%, 0.15);
+}
+select::placeholder {
+  color: hsla(228, 87%, 15%, 0.25);
+  opacity: 1;
+}
+
+#catalog {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+
+.product-container {
+  text-align: center;
+  width: 280px;
+  padding: 12px 16px;
+  background-color: white;
+  border-radius: 12px;
+}
+
+.loading {
+  color: #999;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
